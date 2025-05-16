@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1, h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        /* Forms */
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.secondary {
+            background-color: #f44336;
+        }
+
+        button.secondary:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        /* Summary */
+        .summary-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .summary-box {
+            flex: 1;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            margin: 0 10px;
+            color: white;
+        }
+
+        .income {
+            background-color: #4CAF50;
+        }
+
+        .expense {
+            background-color: #f44336;
+        }
+
+        .balance {
+            background-color: #2196F3;
+        }
+
+        /* Transactions */
+        .transaction-list {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .transaction-list th, .transaction-list td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .transaction-list th {
+            background-color: #f2f2f2;
+        }
+
+        .transaction-list tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #2196F3;
+            margin-right: 5px;
+        }
+
+        .delete-btn {
+            color: #f44336;
+        }
+
+        /* Auth */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .auth-toggle a {
+            color: #2196F3;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .logout-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-bottom: 10px;
+        }
+
+        .success-message {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Auth Section -->
+    <div id="auth-section" class="auth-container">
+        <h2 class="text-center" id="auth-title">Login</h2>
+        <div id="error-message" class="error-message hidden"></div>
+        <div id="success-message" class="success-message hidden"></div>
+        
+        <!-- Login Form -->
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-username">Username:</label>
+                <input type="text" id="login-username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password:</label>
+                <input type="password" id="login-password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <!-- Register Form (Hidden by default) -->
+        <form id="register-form" class="hidden">
+            <div class="form-group">
+                <label for="register-username">Username:</label>
+                <input type="text" id="register-username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="register-email">Email:</label>
+                <input type="email" id="register-email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="register-password">Password:</label>
+                <input type="password" id="register-password" name="password" required>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        
+        <div class="auth-toggle">
+            <a id="auth-toggle-link">Don't have an account? Register</a>
+        </div>
+    </div>
+    
+    <!-- Main App (Hidden by default) -->
+    <div id="app-container" class="container hidden">
+        <div class="logout-container">
+            <h1>Expense Tracker</h1>
+            <div>
+                <span id="welcome-message">Welcome, User!</span>
+                <button id="logout-btn" class="secondary">Logout</button>
+            </div>
+        </div>
+        
+        <!-- Summary Section -->
+        <div class="section">
+            <h2>Financial Summary</h2>
+            <div class="summary-container">
+                <div class="summary-box income">
+                    <h3>Income</h3>
+                    <p id="income-amount">$0.00</p>
+                </div>
+                <div class="summary-box expense">
+                    <h3>Expenses</h3>
+                    <p id="expense-amount">$0.00</p>
+                </div>
+                <div class="summary-box balance">
+                    <h3>Balance</h3>
+                    <p id="balance-amount">$0.00</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Add Transaction Section -->
+        <div class="section">
+            <h2>Add Transaction</h2>
+            <form id="transaction-form">
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" id="amount" name="amount" step="0.01" required placeholder="Enter a positive number for income, negative for expense">
+                </div>
+                <div class="form-group">
+                    <label for="category">Category:</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select Category</option>
+                        <option value="Salary">Salary</option>
+                        <option value="Food">Food</option>
+                        <option value="Transportation">Transportation</option>
+                        <option value="Housing">Housing</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Utilities">Utilities</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" name="description" required>
+                </div>
+                <div class="form-group">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <input type="hidden" id="transaction-id">
+                <button type="submit" id="save-transaction-btn">Add Transaction</button>
+                <button type="button" id="cancel-edit-btn" class="secondary hidden">Cancel</button>
+            </form>
+        </div>
+        
+        <!-- Transactions List Section -->
+        <div class="section">
+            <h2>Transaction History</h2>
+            <table class="transaction-list">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="transactions-body">
+                    <!-- Transactions will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL - Change this to your backend URL
+        const API_BASE_URL = 'http://localhost:8080/api';
+        
+        // DOM Elements
+        const authSection = document.getElementById('auth-section');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authToggleLink = document.getElementById('auth-toggle-link');
+        const authTitle = document.getElementById('auth-title');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const logoutBtn = document.getElementById('logout-btn');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        
+        const incomeAmount = document.getElementById('income-amount');
+        const expenseAmount = document.getElementById('expense-amount');
+        const balanceAmount = document.getElementById('balance-amount');
+        
+        const transactionForm = document.getElementById('transaction-form');
+        const transactionsBody = document.getElementById('transactions-body');
+        const saveTransactionBtn = document.getElementById('save-transaction-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const transactionIdInput = document.getElementById('transaction-id');
+        
+        // Current user data
+        let currentUser = null;
+        
+        // Check if user is logged in
+        function checkAuth() {
+            const userData = localStorage.getItem('user');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+                showApp();
+                loadTransactions();
+                loadSummary();
+            } else {
+                showAuth();
+            }
+        }
+        
+        // Show Authentication Section
+        function showAuth() {
+            authSection.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+        }
+        
+        // Show App
+        function showApp() {
+            authSection.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            welcomeMessage.textContent = `Welcome, ${currentUser.username}!`;
+        }
+        
+        // Toggle Auth Forms
+        function toggleAuthForms() {
+            const isLogin = loginForm.classList.contains('hidden');
+            
+            if (isLogin) {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                authTitle.textContent = 'Login';
+                authToggleLink.textContent = "Don't have an account? Register";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                authTitle.textContent = 'Register';
+                authToggleLink.textContent = "Already have an account? Login";
+            }
+            
+            hideMessages();
+        }
+        
+        // Show Error Message
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.remove('hidden');
+            successMessage.classList.add('hidden');
+        }
+        
+        // Show Success Message
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
+        }
+        
+        // Hide Messages
+        function hideMessages() {
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+        }
+        
+        // Handle Login
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showError(data.error || 'Login failed. Please try again.');
+                    return;
+                }
+                
+                // Save user data and show app
+                currentUser = data;
+                localStorage.setItem('user', JSON.stringify(data));
+                showApp();
+                loadTransactions();
+                loadSummary();
+                
+                // Clear form
+                loginForm.reset();
+                
+            } catch (error) {
+                showError('An error occurred. Please try again later.');
+                console.error('Login error:', error);
+            }
+        }
+        
+        // Handle Register
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showError(data.error || 'Registration failed. Please try again.');
+                    return;
+                }
+                
+                showSuccess('Registration successful! You can now login.');
+                toggleAuthForms(); // Switch to login
+                
+                // Clear form
+                registerForm.reset();
+                
+            } catch (error) {
+                showError('An error occurred. Please try again later.');
+                console.error('Register error:', error);
+            }
+        }
+        
+        // Load Transactions
+        async function loadTransactions() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/transactions?userId=${currentUser.id}`);
+                const transactions = await response.json();
+                
+                // Clear table
+                transactionsBody.innerHTML = '';
+                
+                // Add transactions to table
+                transactions.forEach(transaction => {
+                    addTransactionToTable(transaction);
+                });
+                
+            } catch (error) {
+                console.error('Error loading transactions:', error);
+            }
+        }
+        
+        // Load Summary
+        async function loadSummary() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/summary?userId=${currentUser.id}`);
+                const summary = await response.json();
+                
+                // Update summary
+                incomeAmount.textContent = `$${summary.income.toFixed(2)}`;
+                expenseAmount.textContent = `$${summary.expense.toFixed(2)}`;
+                balanceAmount.textContent = `$${summary.balance.toFixed(2)}`;
+                
+            } catch (error) {
+                console.error('Error loading summary:', error);
+            }
+        }
+        
+        // Add Transaction To Table
+        function addTransactionToTable(transaction) {
+            const tr = document.createElement('tr');
+            
+            // Format date
+            const date = new Date(transaction.date);
+            const formattedDate = date.toLocaleDateString();
+            
+            // Format amount
+            const amount = parseFloat(transaction.amount);
+            const formattedAmount = `$${Math.abs(amount).toFixed(2)}`;
+            const amountClass = amount >= 0 ? 'income' : 'expense';
+            
+            tr.innerHTML = `
+                <td>${formattedDate}</td>
+                <td>${transaction.description}</td>
+                <td>${transaction.category}</td>
+                <td style="color: ${amount >= 0 ? '#4CAF50' : '#f44336'}">${formattedAmount}</td>
+                <td>
+                    <button class="action-btn edit-btn" data-id="${transaction.id}">Edit</button>
+                    <button class="action-btn delete-btn" data-id="${transaction.id}">Delete</button>
+                </td>
+            `;
+            
+            // Add event listeners for edit and delete buttons
+            tr.querySelector('.edit-btn').addEventListener('click', () => editTransaction(transaction));
+            tr.querySelector('.delete-btn').addEventListener('click', () => deleteTransaction(transaction.id));
+            
+            transactionsBody.appendChild(tr);
+        }
+        
+        // Handle Transaction Form Submit
+        async function handleTransactionSubmit(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('amount').value);
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            const date = document.getElementById('date').value;
+            const transactionId = document.getElementById('transaction-id').value;
+            
+            const transactionData = {
+                amount,
+                category,
+                description,
+                date
+            };
+            
+            try {
+                let response;
+                
+                if (transactionId) {
+                    // Update existing transaction
+                    response = await fetch(`${API_BASE_URL}/transactions/${transactionId}?userId=${currentUser.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(transactionData)
+                    });
+                } else {
+                    // Add new transaction
+                    response = await fetch(`${API_BASE_URL}/transactions?userId=${currentUser.id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(transactionData)
+                    });
+                }
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to save transaction');
+                }
+                
+                // Reset form and reload data
+                resetTransactionForm();
+                loadTransactions();
+                loadSummary();
+                
+            } catch (error) {
+                console.error('Error saving transaction:', error);
+                alert(error.message || 'An error occurred. Please try again.');
+            }
+        }
+        
+        // Edit Transaction
+        function editTransaction(transaction) {
+            // Fill form with transaction data
+            document.getElementById('amount').value = transaction.amount;
+            document.getElementById('category').value = transaction.category;
+            document.getElementById('description').value = transaction.description;
+            document.getElementById('date').value = transaction.date;
+            document.getElementById('transaction-id').value = transaction.id;
+            
+            // Change button text
+            saveTransactionBtn.textContent = 'Update Transaction';
+            cancelEditBtn.classList.remove('hidden');
+            
+            // Scroll to form
+            transactionForm.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Delete Transaction
+        async function deleteTransaction(id) {
+            if (!confirm('Are you sure you want to delete this transaction?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/transactions/${id}?userId=${currentUser.id}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete transaction');
+                }
+                
+                // Reload data
+                loadTransactions();
+                loadSummary();
+                
+            } catch (error) {
+                console.error('Error deleting transaction:', error);
+                alert(error.message || 'An error occurred. Please try again.');
+            }
+        }
+        
+        // Reset Transaction Form
+        function resetTransactionForm() {
+            transactionForm.reset();
+            document.getElementById('transaction-id').value = '';
+            saveTransactionBtn.textContent = 'Add Transaction';
+            cancelEditBtn.classList.add('hidden');
+        }
+        
+        // Handle Logout
+        function handleLogout() {
+            localStorage.removeItem('user');
+            currentUser = null;
+            showAuth();
+        }
+        
+        // Set today's date as default for date input
+        function setTodayDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+            
+            document.getElementById('date').value = `${yyyy}-${mm}-${dd}`;
+        }
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            setTodayDate();
+            
+            // Auth Toggle
+            authToggleLink.addEventListener('click', toggleAuthForms);
+            
+            // Login Form
+            loginForm.addEventListener('submit', handleLogin);
+            
+            // Register Form
+            registerForm.addEventListener('submit', handleRegister);
+            
+            // Logout
+            logoutBtn.addEventListener('click', handleLogout);
+            
+            // Transaction Form
+            transactionForm.addEventListener('submit', handleTransactionSubmit);
+            
+            // Cancel Edit Button
+            cancelEditBtn.addEventListener('click', resetTransactionForm);
+        });
+    </script>
+</body>
+</html>
